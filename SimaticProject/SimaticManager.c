@@ -7,15 +7,17 @@ DEFINE_GUID(IID_IDispatch, 0x00020400, 0x0000, 0x0000, 0xC0, 0x00, 0x00, 0x00, 0
 
 HRESULT hr;
 CLSID clsid;
-ITypeLib *pTypeLib = NULL;
 IDispatch *pDispatch = NULL;
 DISPID dispid;
 DISPPARAMS dispParams = { NULL, NULL, 0, 0 };
 VARIANT result;
+
+ITypeLib *pTypeLib = NULL;
 const wchar_t *tlbPath = L"C:/Program Files (x86)/Siemens/Step7/S7BIN/S7ABATCX.TLB";
 
 int main(void){
     LoadInterface();
+    LoadTypeLibrary();
     // Execute here....
 
     UnloadInterface();
@@ -24,7 +26,6 @@ int main(void){
 
 int LoadInterface(void) {
     // Step 1: Initialize COM
-    printf("Starting load interface.\n");
     hr = CoInitialize(NULL);
     if (FAILED(hr)) {
         printf("Failed to initialize COM.\n");
@@ -32,7 +33,6 @@ int LoadInterface(void) {
     }
 
     // Step 2: Get CLSID from ProgID "Simatic.Simatic.1"
-    printf("Starting Simatic.Simatic.1 loading...\n");
     hr = CLSIDFromProgID(L"Simatic.Simatic.1", &clsid);
     if (FAILED(hr)) {
         printf("Failed to get CLSID from ProgID.\n");
@@ -41,19 +41,26 @@ int LoadInterface(void) {
     }
 
     // Step 3: Create COM instance and load library enums
-    printf("Creating COM Instance\n");
     hr = CoCreateInstance(&clsid, NULL, CLSCTX_INPROC_SERVER | CLSCTX_LOCAL_SERVER, &IID_IDispatch, (void**)&pDispatch);
     if (FAILED(hr)) {
         printf("Failed to create COM instance.\n");
         CoUninitialize();
         return 1;
     }
-    // Load interface Enum
-    printf("Loading ENUM Libraries\n");
-    //pTypeLib->lpVtbl->Release(pTypeLib);
 
+    printf("COM object created successfully.\n");
+    return 0;
+}
 
-    printf("COM object created successfully!\n");
+int LoadTypeLibrary(void){
+    HRESULT hr = LoadTypeLibEx(tlbPath, REGKIND_NONE, &pTypeLib);
+    //HRESULT hr = LoadTypeLibEx(L"C:\\Program Files (x86)\\Siemens\\Step7\\S7BIN\\S7ABATCX.TLB", REGKIND_NONE, &pTypeLib);
+    if (FAILED(hr)) {
+        printf("Failed to load type library.\n");
+        return 1;
+    }
+    
+    printf("Type Library loaded successfully.\n");
     return 0;
 }
 

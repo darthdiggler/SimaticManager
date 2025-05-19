@@ -4,5 +4,6 @@
 
 // Function Interface
 int LoadInterface();
+int LoadTypeLibrary(void);
 void UnloadInterface(void);
 int CallFunction(void);
